@@ -1,5 +1,3 @@
-
-
 Plain = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 Cipher = ["X", "Y", "Z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W"]
 
@@ -17,8 +15,6 @@ def encryptceaser(message):
     
     return em
 
-print(encryptceaser("name"))
-
 
 def Dencryptceaser(message): #works are ceaser cipher ecryption (happy accident)
     message = message.upper()
@@ -30,6 +26,8 @@ def Dencryptceaser(message): #works are ceaser cipher ecryption (happy accident)
             elif message[i] == " ":
                 em= em + " "
     return em
+
+
 
 
 
