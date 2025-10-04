@@ -11,7 +11,7 @@ body{
     color: rgb(248, 247, 244);
     background-color: rgb(150, 191, 238);
     
-
+    
     width: 100%;
     display: flex;
     justify-content: center;
@@ -48,7 +48,7 @@ body{
     80%  { transform: translateX(-400%); }
     90%  { transform: translateX(-400%); }  /* pause on fifth */
     
-    100% { transform: translateX(0%); }     /* reset smoothly */
+    100% { transform: translateX(-500%); }     /* reset smoothly */
   }
   
   
