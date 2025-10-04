@@ -6,11 +6,16 @@ body{
     display: flex;
     justify-content: space-between;
     flex-direction: row;
-    
-
+    position: relative;
 }
 .font{
     font-family: "Gabarito";
-    font-size: 100%;
+    font-size: 14pt;
+    letter-spacing: 0.3px;
+}
+button{
+    background-color: rgb(186, 166, 221);
+    border-radius: 5rem;
+;
 }
 
