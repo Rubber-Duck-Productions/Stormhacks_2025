@@ -8,7 +8,7 @@ const chatbotToggler = document.querySelector("#chatbot-toggler");
 const closeChatbot = document.querySelector("#close-chatbot");
 
 // API setup - Using secure backend proxy
-const BACKEND_URL = "https://final-project-10-streams.onrender.com";
+const BACKEND_URL = "";   // Set to "" to use same origin as frontend
 const API_URL = `${BACKEND_URL}/api/generate`;
 
 // Custom system prompt configuration
