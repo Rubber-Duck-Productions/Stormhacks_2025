@@ -3,47 +3,52 @@ body{
 }
 .marquee-banner{
     font-size: 12pt;
-    padding-block: 4px;
+    padding-block: 8px;
     border-block: 1px solid;
     overflow: hidden;
     user-select: none;
+    
+
     width: 100%;
-    text-align: center;
     display: flex;
-    gap: 2rem;
+    justify-content: center;
+    align-items: center;
 }
 .marquee-banner ul{
-    list-style:  none;
-    flex-shrink: 0;
-    min-width: 100%;
-    position: relative;
+    list-style: none;
     display: flex;
-    justify-content: space-between;
-    gap: 2rem;
+    padding: 0;
+    margin: 0;
+    width: max-content;
+    animation: slide 30s ease-in-out infinite;
 }
 
 .marquee-banner li {
-    position: absolute;
-    width: 100%;
-    opacity: 0;
-    transform: translateY(100%);
-    animation: fadeScroll 30s ease-in-out infinite;
+    flex: 0 0 100%;
+    text-align: center;
+    white-space: nowrap;
+}
+
+@keyframes slide {
+    0%   { transform: translateX(0%); }
+    10%  { transform: translateX(0%); }     /* pause on first */
+    
+    20%  { transform: translateX(-100%); }  
+    30%  { transform: translateX(-100%); }  /* pause on second */
+    
+    40%  { transform: translateX(-200%); }
+    50%  { transform: translateX(-200%); }  /* pause on third */
+    
+    60%  { transform: translateX(-300%); }
+    70%  { transform: translateX(-300%); }  /* pause on fourth */
+    
+    80%  { transform: translateX(-400%); }
+    90%  { transform: translateX(-400%); }  /* pause on fifth */
+    
+    100% { transform: translateX(0%); }     /* reset smoothly */
   }
   
-  /* there are 5 phrases, so each gets a staggered delay */
-  .marquee-banner li:nth-child(1) { animation-delay: 0s; }
-  .marquee-banner li:nth-child(2) { animation-delay: 6s; }
-  .marquee-banner li:nth-child(3) { animation-delay: 12s; }
-  .marquee-banner li:nth-child(4) { animation-delay: 18s; }
-  .marquee-banner li:nth-child(5) { animation-delay: 24s; }
   
-  @keyframes fadeScroll {
-    0% { opacity: 0; transform: translateY(100%); }
-    5% { opacity: 1; transform: translateY(0); }
-    20% { opacity: 1; transform: translateY(0); }   /* visible for ~5s */
-    25% { opacity: 0; transform: translateY(-100%); }
-    100% { opacity: 0; transform: translateY(-100%); }
-  }
 .Nav{
     margin-top:1.3rem;
     display: flex;
