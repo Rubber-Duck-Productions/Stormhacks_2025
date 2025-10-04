@@ -101,6 +101,7 @@ button{
     justify-content: center;
     align-items: center;
     align-content: center;
+    gap: 1rem;
 
 }
 .head{font-size:3rem;text-align:center;margin:0}
@@ -139,7 +140,7 @@ img{
     padding: 1rem;
 }
 
-/* ThirdContent removed */
+
 
 .font{font-family: 'Gabarito', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
 .head{font-size: 2.25rem;margin:0}
