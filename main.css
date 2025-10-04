@@ -4,10 +4,13 @@ body{
 .marquee-banner{
     font-size: 12pt;
     padding-block: 8px;
-    border-block: 1px solid;
+    border-block: none;
     overflow: hidden;
     user-select: none;
     font-family: "Gabarito";
+    color: rgb(248, 247, 244);
+    background-color: rgb(150, 191, 238);
+    
 
     width: 100%;
     display: flex;
@@ -55,6 +58,9 @@ body{
     justify-content: space-between;
     flex-direction: row;
     position: relative;
+    align-items: center;
+    margin-left: 1rem;
+    margin-right: 1rem;
 }
 .font{
     font-family: "Gabarito";
@@ -66,10 +72,21 @@ body{
     font-size: 16pt;
     font-weight: bold;
 }
+.Logs{
+    display: flex;
+    gap:1rem;
+}
 button{
     background-color: rgb(186, 166, 221);
     border-radius: 5rem;
-    
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 8rem;
+    color: white;
+    border: transparent;
+    height: 2rem;
 
 }
 .MainContent{
@@ -79,7 +96,6 @@ button{
     justify-content: center;
     align-items: center;
     align-content: center;
-    gap: 2%;
 
 }
 .head{
@@ -94,5 +110,19 @@ button{
 img{
     width: 60%;
     border-radius: 1rem;
+    margin-bottom: 1rem;
 }
+.Jump1{
+  
+    font-family: "gabarito";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15%;
+    font-size: 14pt;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
 
