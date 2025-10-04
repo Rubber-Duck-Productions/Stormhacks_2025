@@ -1,6 +1,17 @@
 body{
     background-color: rgb(248, 247, 244) ;
 }
+.marquee-banner{
+    font-size: 12pt;
+    padding-block: 8px;
+    border-block: 1px solid;
+}
+.marquee-banner ul{
+    list-style:  none;
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+}
 .Nav{
     margin-top:1.3rem;
     display: flex;
