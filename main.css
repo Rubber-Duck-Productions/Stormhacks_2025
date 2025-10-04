@@ -7,7 +7,7 @@ body{
     border-block: 1px solid;
     overflow: hidden;
     user-select: none;
-    
+    font-family: "Gabarito";
 
     width: 100%;
     display: flex;
