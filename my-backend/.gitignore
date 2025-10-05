@@ -1,5 +1,0 @@
-
-# Ignore dotenv files with secrets
-.env
-npm-debug.log
-node_modules/
