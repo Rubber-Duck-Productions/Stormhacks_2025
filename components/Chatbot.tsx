@@ -99,7 +99,29 @@ const Chatbot: React.FC = () => {
       <div className="MainContent">
         <div className="text">
           <h1 className="font head">Your AI Therapy Session</h1>
-          <p className="font sub">We're here to listen and support you.</p>
+          <p className="font sub">We're here to listen and support you. Experience therapy with advanced voice recognition and facial expression analysis.</p>
+          <div className="mt-6 flex justify-center space-x-4">
+            <div className="flex items-center space-x-2 bg-slate-800/50 px-4 py-2 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-red-400">
+                <path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4z" />
+                <path d="M5.5 9.643a.75.75 0 00-1.5 0V10c0 3.06 2.29 5.585 5.25 5.954V17.5a.75.75 0 001.5 0v-1.546A6.001 6.001 0 0016 10v-.357a.75.75 0 00-1.5 0V10a4.5 4.5 0 11-9 0v-.357z" />
+              </svg>
+              <span className="text-slate-300 text-sm">Voice-to-Text</span>
+            </div>
+            <div className="flex items-center space-x-2 bg-slate-800/50 px-4 py-2 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-blue-400">
+                <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
+                <path fillRule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+              </svg>
+              <span className="text-slate-300 text-sm">Facial Analysis</span>
+            </div>
+            <div className="flex items-center space-x-2 bg-slate-800/50 px-4 py-2 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-emerald-400">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              </svg>
+              <span className="text-slate-300 text-sm">Secure & Private</span>
+            </div>
+          </div>
         </div>
         
         <div className="therapy-session-container" style={{ width: '100%', display: 'flex', gap: '2rem' }}>
