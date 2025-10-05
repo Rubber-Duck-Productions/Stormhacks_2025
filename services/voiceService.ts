@@ -1,10 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
-
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Voice recognition service - no API key needed for browser speech recognition
 
 export interface VoiceRecognitionResult {
   transcript: string;
