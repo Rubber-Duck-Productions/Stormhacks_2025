@@ -228,8 +228,6 @@ img:hover{
     box-shadow: 0 12px 35px var(--shadow-medium);
 }
 
-
-
 .font{font-family: 'Gabarito', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
 .head{font-size: 3rem;margin:0}
 .sub{color: var(--muted);margin:0}

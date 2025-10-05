@@ -1,5 +1,5 @@
 
-import React, { forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef, useEffect, useState } from 'react';
 
 interface CameraFeedProps {
   onStreamReady: () => void;
@@ -15,12 +15,21 @@ const CameraFeed = forwardRef<CameraFeedHandle, CameraFeedProps>(({ onStreamRead
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
+    let currentStream: MediaStream | null = null;
+
     async function setupCamera() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          onStreamReady();
+        // Only request new stream if we don't have one
+        if (!currentStream) {
+          currentStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        }
+        
+        if (videoRef.current && !videoRef.current.srcObject) {
+          videoRef.current.srcObject = currentStream;
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play();
+            onStreamReady();
+          };
         }
       } catch (err) {
         console.error("Error accessing camera:", err);
@@ -30,27 +39,35 @@ const CameraFeed = forwardRef<CameraFeedHandle, CameraFeedProps>(({ onStreamRead
     setupCamera();
 
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onError]);
+  }, []);
+
+  const [isCapturing, setIsCapturing] = useState(false);
 
   useImperativeHandle(ref, () => ({
     captureFrame: () => {
-      if (videoRef.current && canvasRef.current) {
+      if (videoRef.current && canvasRef.current && !isCapturing) {
+        setIsCapturing(true);
         const video = videoRef.current;
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
         
-        if (context) {
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-          return dataUrl.split(',')[1];
+        try {
+          // Check if video is actually playing and has dimensions
+          if (context && video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
+            // Use the current video dimensions
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            return dataUrl.split(',')[1];
+          }
+        } finally {
+          setIsCapturing(false);
         }
       }
       return null;
