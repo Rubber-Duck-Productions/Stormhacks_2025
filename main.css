@@ -121,7 +121,7 @@ button:hover{
     margin: 2%;
     display:flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: center; 
     align-items: center;
     align-content: center;
     gap: 2rem;
