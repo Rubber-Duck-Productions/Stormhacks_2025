@@ -78,7 +78,36 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto mt-4 h-[50vh] flex flex-col bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-3xl border border-slate-600/50 shadow-2xl">
+    <div className="w-full h-full flex flex-col bg-gradient-to-br from-slate-900/60 to-slate-950/60 backdrop-blur-xl rounded-3xl border border-slate-600/60 shadow-2xl chat-shell">
+      {/* Chat Header */}
+      <div className="px-6 py-4 bg-gradient-to-r from-slate-950/60 to-slate-900/60 border-b border-slate-700/60 rounded-t-3xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-white">
+                <path d="M18 13a3 3 0 00-3-3H9a3 3 0 00-3 3v2a2 2 0 002 2h8a2 2 0 002-2v-2z" />
+                <path d="M9 11a4 4 0 100-8 4 4 0 000 8z" />
+              </svg>
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-slate-100 font-semibold">Tessa</span>
+                <span className="inline-flex items-center space-x-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span className="text-emerald-300 text-xs">online</span>
+                </span>
+              </div>
+              <p className="text-slate-400 text-xs">Empathetic AI therapist</p>
+            </div>
+          </div>
+          <div className="hidden sm:flex items-center space-x-2 text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+              <path fillRule="evenodd" d="M10.5 1.5a4 4 0 00-4 4V8H5a2.5 2.5 0 00-2.5 2.5v5A2.5 2.5 0 005 18h10a2.5 2.5 0 002.5-2.5v-5A2.5 2.5 0 0015 8h-1.5V5.5a4 4 0 00-4-4zm-2.5 6.5V5.5a2.5 2.5 0 115 0V8h-5z" clipRule="evenodd" />
+            </svg>
+            <span className="text-xs">Secure session</span>
+          </div>
+        </div>
+      </div>
       {/* Voice Status Bar */}
       {voiceState.isListening && (
         <div className="px-6 py-3 bg-gradient-to-r from-red-500/20 to-pink-500/20 border-b border-red-400/30">
@@ -103,7 +132,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
         </div>
       )}
 
-      <div className="flex-1 p-6 overflow-y-auto">
+      <div className="flex-1 p-6 overflow-y-auto chat-scroll">
         {messages.length === 0 && (
           <div className="flex justify-center items-center h-full">
             <div className="text-center">
@@ -119,12 +148,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
         )}
         {messages.map((msg, index) => (
           <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} mb-4 group`}>
-            <div className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-3 rounded-2xl break-words transition-all duration-300 hover:scale-105 ${
+            <div className={`max-w-[72%] px-4 py-3 rounded-2xl break-words transition-all duration-300 hover:shadow-xl ${
               msg.role === 'user' 
-                ? 'bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-lg' 
-                : 'bg-gradient-to-br from-slate-700 to-slate-800 text-slate-200 shadow-lg border border-slate-600/50'
+                ? 'bg-gradient-to-br from-sky-500 to-cyan-600 text-white shadow-lg border border-cyan-400/30' 
+                : 'bg-slate-800/80 text-slate-100 shadow-lg border border-slate-600/60'
             }`}>
-              <p className="text-base leading-relaxed">{msg.content}</p>
+              <p className="text-[0.95rem] leading-relaxed tracking-[0.005em]">{msg.content}</p>
             </div>
           </div>
         ))}
@@ -180,7 +209,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
         </div>
       )}
 
-      <form onSubmit={handleSend} className="p-4 border-t border-slate-600/50">
+      <form onSubmit={handleSend} className="p-4 border-t border-slate-700/60 bg-slate-900/40 rounded-b-3xl">
         <div className="relative">
           <input
             type="text"
@@ -188,7 +217,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
             onChange={(e) => setInput(e.target.value)}
             placeholder="Share what's on your mind..."
             disabled={isLoading}
-            className="w-full bg-slate-700/80 border border-slate-600/50 rounded-full py-3 pl-5 pr-20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm"
+            className="w-full bg-slate-800/70 border border-slate-600/60 rounded-full py-3 pl-5 pr-24 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 backdrop-blur-md shadow-inner"
             aria-label="Chat message input"
           />
           
@@ -198,7 +227,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
             <button
               type="button"
               onClick={() => setShowVoiceSettings(!showVoiceSettings)}
-              className="p-2 text-slate-400 hover:text-slate-200 transition-colors"
+              className="p-2 text-slate-400 hover:text-slate-200 transition-colors hover:bg-slate-700/60 rounded-full"
               title="Voice settings"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -215,7 +244,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
                 voiceState.isListening
                   ? 'bg-red-500 text-white animate-pulse'
                   : voiceState.isSupported
-                  ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-600'
+                  ? 'text-slate-300 hover:text-white hover:bg-slate-700/70'
                   : 'text-slate-600 cursor-not-allowed'
               }`}
               title={voiceState.isSupported ? (voiceState.isListening ? 'Stop listening' : 'Start voice input') : 'Voice not supported'}
@@ -230,7 +259,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="bg-gradient-to-r from-sky-500 to-cyan-500 text-white rounded-full p-2.5 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all duration-200 hover:scale-105"
+              className="bg-gradient-to-r from-cyan-500 to-sky-600 text-white rounded-full p-2.5 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-95 transition-all duration-200 hover:scale-105 shadow-md"
               aria-label="Send message"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">

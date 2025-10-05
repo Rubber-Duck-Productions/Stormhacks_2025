@@ -1,3 +1,4 @@
+/* corrected for CSS custom properties to apply globally */
 :root {
     --white: rgb(248, 247, 244);
     --purple: rgb(186, 166, 221);

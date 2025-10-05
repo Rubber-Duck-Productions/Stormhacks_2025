@@ -75,7 +75,7 @@ const CameraFeed = forwardRef<CameraFeedHandle, CameraFeedProps>(({ onStreamRead
   }));
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto aspect-video bg-slate-800 rounded-2xl overflow-hidden shadow-2xl shadow-cyan-500/10 border-2 border-slate-700">
+    <div className="relative w-full h-full bg-slate-800 rounded-2xl overflow-hidden shadow-2xl shadow-cyan-500/10 border-2 border-slate-700">
       <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover transform -scale-x-100" />
       <canvas ref={canvasRef} className="hidden" />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-50"></div>

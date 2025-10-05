@@ -98,25 +98,25 @@ const App: React.FC = () => {
 
       <div className="MainContent">
         <div className="text">
-          <h1 className="font head">Your AI Therapy Session</h1>
+          <h1 className="font head gradient-text">Your AI Therapy Session</h1>
           <p className="font sub">We're here to listen and support you.</p>
         </div>
         
-        <div style={{ width: '100%', display: 'flex', gap: '2rem' }}>
-          <div style={{ flex: 1 }}>
+        <div className="therapy-session-container">
+          <div style={{ flex: 1, display: 'flex' }}>
             <CameraFeed 
               ref={cameraRef} 
               onStreamReady={() => { console.log('Camera ready.') }}
               onError={(err) => handleError("Camera access denied or not available. Please check permissions.", true)}
             />
             {error && (
-              <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: 'rgba(255, 0, 0, 0.1)', borderRadius: '0.5rem', color: 'var(--dark_green)' }}>
+              <div className="error-message">
                 {error}
               </div>
             )}
           </div>
           
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, display: 'flex' }}>
             <ChatInterface 
               messages={messages}
               onSendMessage={handleSendMessage}
