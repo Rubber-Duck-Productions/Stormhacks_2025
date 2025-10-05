@@ -350,6 +350,8 @@ footer {
     flex-wrap: wrap;
     background-color: rgb(0, 52, 1);
     padding: 60px 10%;
+    margin:0;
+    border-radius: 2rem;
   }
   
   .footer-col {
@@ -376,7 +378,7 @@ footer {
   }
   
   .footer-col a:hover {
-    color: var(--jordy_blue); /* accent color on hover */
+    color: var(--light_green); /* accent color on hover */
   }
   
   .footer-col i {
