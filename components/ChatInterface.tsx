@@ -9,15 +9,39 @@ interface ChatInterfaceProps {
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, isLoading }) => {
   const [input, setInput] = useState('');
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const isNearBottom = () => {
+    if (!messagesContainerRef.current) return true;
+    const container = messagesContainerRef.current;
+    const threshold = 100; // pixels from bottom
+    return container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+  };
+
   useEffect(() => {
-    scrollToBottom();
+    // Only auto-scroll if user is already near the bottom
+    if (isNearBottom()) {
+      scrollToBottom();
+    }
   }, [messages]);
+
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      setShowScrollButton(!isNearBottom());
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +53,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
 
   return (
     <div className="w-full max-w-2xl mx-auto mt-4 h-[50vh] flex flex-col bg-slate-800/50 rounded-2xl border border-slate-700 shadow-lg">
-      <div className="flex-1 p-6 overflow-y-auto">
+      <div ref={messagesContainerRef} className="flex-1 p-6 overflow-y-auto relative">
         {messages.length === 0 && (
           <div className="flex justify-center items-center h-full">
             <p className="text-slate-400">Send a message to start the conversation.</p>
@@ -54,6 +78,19 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
           </div>
         )}
         <div ref={messagesEndRef} />
+        
+        {/* Scroll to bottom button */}
+        {showScrollButton && (
+          <button
+            onClick={scrollToBottom}
+            className="absolute bottom-4 right-4 bg-sky-500 hover:bg-sky-600 text-white rounded-full p-2 shadow-lg transition-all duration-200 z-10"
+            aria-label="Scroll to bottom"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+              <path fillRule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clipRule="evenodd" />
+            </svg>
+          </button>
+        )}
       </div>
       <form onSubmit={handleSend} className="p-4 border-t border-slate-700">
         <div className="relative">
