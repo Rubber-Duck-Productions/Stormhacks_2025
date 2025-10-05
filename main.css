@@ -529,7 +529,7 @@ footer {
     display: flex;
     gap: var(--spacing-lg);
     align-items: stretch;
-    min-height: 60vh;
+    height: 70vh; /* fixed height to keep chat from expanding page */
 }
 
 /* Chat scrollbar and shell embellishments */
