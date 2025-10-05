@@ -1,0 +1,13 @@
+Colors
+
+White: rgb(248, 247, 244) //Background
+Purple: rgb(186, 166, 221) //Accent 
+Blue: rgb(150, 191, 238) //Primary
+
+Font
+Inter
+Montserrat
+DM Sans
+Raleway
+Roboto
+Anton
