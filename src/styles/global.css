@@ -211,3 +211,16 @@ body {
     flex-direction: column;
     transition: var(--transition-smooth);
 }
+
+/* small helper for summaries menu toggling */
+#summariesMenu {
+    display: none;
+}
+#summariesMenu.show {
+    display: block !important;
+}
+
+/* ensure summaries menu sits above other UI layers */
+#summariesMenu {
+    z-index: 99999;
+}

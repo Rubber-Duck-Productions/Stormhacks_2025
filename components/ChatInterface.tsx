@@ -20,6 +20,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
   });
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [voiceLanguage, setVoiceLanguage] = useState('en-US');
+  const [summaries, setSummaries] = useState<string[]>([]);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const voiceServiceRef = useRef<VoiceRecognitionService | null>(null);
@@ -58,6 +59,60 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
       voiceServiceRef.current.setLanguage(voiceLanguage);
     }
   }, [voiceLanguage]);
+
+  // Cookie helpers (simple)
+  function setCookie(name: string, value: string, days = 30) {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+  }
+  function getCookie(name: string) {
+    return document.cookie.split('; ').reduce((r, v) => {
+      const parts = v.split('=');
+      return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+    }, '') as string;
+  }
+
+  // Keep summaries in cookies as JSON array under 'chat_summaries'
+  useEffect(() => {
+    const raw = getCookie('chat_summaries');
+    if (raw) {
+      try {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) setSummaries(arr);
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, []);
+
+  // When messages change and last message is from assistant, request a summary
+  useEffect(() => {
+    if (!messages || messages.length === 0) return;
+    const last = messages[messages.length - 1];
+    if (last.role !== 'model') return; // only summarize after assistant replies
+
+    // send messages to server to generate a short summary
+    (async () => {
+      try {
+        const resp = await fetch('/api/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages })
+        });
+        if (!resp.ok) return;
+        const data = await resp.json();
+        const summary = data.summary;
+        if (summary) {
+          // prepend newest
+          const newSummaries = [summary].concat(summaries).slice(0, 10);
+          setSummaries(newSummaries);
+          try { setCookie('chat_summaries', JSON.stringify(newSummaries), 365); } catch (e) { /* ignore */ }
+        }
+      } catch (e) {
+        console.error('Failed to fetch summary', e);
+      }
+    })();
+  }, [messages]);
 
   const toggleVoiceRecognition = useCallback(() => {
     if (!voiceServiceRef.current) return;
@@ -101,6 +156,37 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
             </div>
           </div>
           <div className="hidden sm:flex items-center space-x-2 text-slate-400">
+            <div className="relative">
+              <button
+                type="button"
+                className="text-slate-300 hover:text-white hover:bg-slate-700/60 px-3 py-1 rounded-md"
+                onClick={(e) => {
+                  const el = document.getElementById('summariesMenu');
+                  if (el) el.classList.toggle('show');
+                }}
+                aria-haspopup="true"
+                aria-expanded={summaries.length > 0}
+              >
+                Summaries <span className="ml-1 text-xs">▾</span>
+              </button>
+              <div id="summariesMenu" className="absolute right-0 mt-2 w-64 bg-slate-800/95 border border-slate-700 rounded-lg shadow-lg p-2 hidden z-40">
+                {summaries.length === 0 && <div className="text-slate-400 text-sm px-2 py-1">No summaries yet</div>}
+                {summaries.map((s, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      // insert summary into chat input
+                      setInput(prev => (prev ? prev + '\n' + s : s));
+                      // close menu
+                      const el = document.getElementById('summariesMenu'); if (el) el.classList.remove('show');
+                    }}
+                    className="w-full text-left text-slate-200 text-sm px-2 py-2 hover:bg-slate-700 rounded-md"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
               <path fillRule="evenodd" d="M10.5 1.5a4 4 0 00-4 4V8H5a2.5 2.5 0 00-2.5 2.5v5A2.5 2.5 0 005 18h10a2.5 2.5 0 002.5-2.5v-5A2.5 2.5 0 0015 8h-1.5V5.5a4 4 0 00-4-4zm-2.5 6.5V5.5a2.5 2.5 0 115 0V8h-5z" clipRule="evenodd" />
             </svg>

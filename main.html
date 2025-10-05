@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <title>Placeholder</title>
+    <title>Therapy buddy</title>
 </head>
 <body>
     <!--Moving Banner-->
@@ -31,6 +31,21 @@
             <!--login and signup-->
             <a><button class="font b1">Anonymous</button></a>
             <a href="login.html"><button class="font b1">Log In</button></a>
+            <!-- Profile dropdown on the right -->
+            <div class="dropdown">
+                <button class="font dropdown-toggle" id="profileToggle" aria-expanded="false">
+                    Profile <i class="fas fa-caret-down" style="margin-left:8px;"></i>
+                </button>
+                <ul class="dropdown-menu" id="profileMenu" role="menu" aria-labelledby="profileToggle">
+                    <li role="none"><a role="menuitem" href="#" class="dropdown-item">Chat 1</a></li>
+                    <li role="none"><a role="menuitem" href="#" class="dropdown-item">Chat 2</a></li>
+                    <li role="none"><a role="menuitem" href="#" class="dropdown-item">Chat 3</a></li>
+                    <li role="none"><a role="menuitem" href="#" class="dropdown-item">Chat 4</a></li>
+                    <li role="none"><a role="menuitem" href="#" class="dropdown-item">Chat 5</a></li>
+                    <li role="none"><a role="menuitem" href="#" class="dropdown-item">Chat 6</a></li>
+                    <li role="none"><a role="menuitem" href="#" class="dropdown-item">Chat 7</a></li>
+                </ul>
+            </div>
 
         </div>
 
@@ -109,4 +124,39 @@
 
 
 </body>
+</html>
+
+<script>
+// Dropdown toggle behavior (keeps markup minimal, works without frameworks)
+(() => {
+    const toggle = document.getElementById('profileToggle');
+    const menu = document.getElementById('profileMenu');
+    if (!toggle || !menu) return;
+
+    function closeMenu() {
+        menu.classList.remove('show');
+        toggle.setAttribute('aria-expanded', 'false');
+    }
+
+    function openMenu() {
+        menu.classList.add('show');
+        toggle.setAttribute('aria-expanded', 'true');
+    }
+
+    toggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (menu.classList.contains('show')) closeMenu(); else openMenu();
+    });
+
+    // close on outside click
+    document.addEventListener('click', (e) => {
+        if (!menu.contains(e.target) && !toggle.contains(e.target)) closeMenu();
+    });
+
+    // close on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeMenu();
+    });
+})();
+</script>
 </html>

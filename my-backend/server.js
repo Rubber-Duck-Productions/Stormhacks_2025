@@ -35,9 +35,10 @@ app.get('/api', (req, res) => {
     endpoints: {
       health: '/api/health',
       location: '/api/location?ip=<optional-ip>',
-      weather: '/api/weather (defaults to request IP location) — or /api/weather?city=<city> or ?lat=<lat>&lon=<lon>'
+      weather: '/api/weather (defaults to request IP location) — or /api/weather?city=<city> or ?lat=<lat>&lon=<lon>',
+      summarize: '/api/summarize (POST)'
     },
-    notes: 'Location uses ip-api.com, weather uses Open-Meteo (no API key). Provide city or lat+lon for /api/weather.'
+    notes: 'Location uses ip-api.com, weather uses Open-Meteo (no API key). Provide city or lat+lon for /api/weather. Summaries use Gemini if configured.'
   });
 });
 
@@ -171,6 +172,34 @@ app.get('/api/weather', async (req, res) => {
     console.error('weather error', err);
     if (err.message && err.message.includes('Geocoding failed')) return res.status(502).json({ error: 'Geocoding provider error' });
     if (err.message && err.message.includes('ip-api failed')) return res.status(502).json({ error: 'IP location provider error' });
+    res.status(500).json({ error: 'Internal error' });
+  }
+});
+
+// Top-level summarize endpoint
+app.post('/api/summarize', async (req, res) => {
+  try {
+    const { messages } = req.body || {};
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ error: 'Provide `messages` array in the body' });
+    }
+
+    const key = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    if (!key) {
+      return res.status(503).json({ error: 'Gemini API key not configured on server' });
+    }
+
+    const history = messages.slice(-30).map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n');
+    const prompt = `Summarize the following conversation in one or two concise sentences that could serve as a session note. Keep it empathetic and avoid revealing personal details.\n\nConversation:\n${history}\n\nSummary:`;
+
+    const { GoogleGenAI } = await import('@google/genai');
+    const ai = new GoogleGenAI({ apiKey: key });
+    const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+    const summary = response?.text?.trim();
+    if (!summary) return res.status(502).json({ error: 'Failed to generate summary' });
+    res.json({ summary });
+  } catch (err) {
+    console.error('summarize error', err);
     res.status(500).json({ error: 'Internal error' });
   }
 });
