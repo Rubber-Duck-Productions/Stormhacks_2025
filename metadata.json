@@ -1,7 +1,0 @@
-{
-  "name": "zenith",
-  "description": "An AI-powered mental therapy chatbot that considers your facial expression to provide more empathetic and personalized advice.",
-  "requestFramePermissions": [
-    "camera"
-  ]
-}
