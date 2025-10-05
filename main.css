@@ -113,6 +113,22 @@ html, body{
     overflow: visible;
 }
 
+/* Centered brand title in nav */
+.NavTitle{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    font-size: clamp(1.25rem, 2.6vw, 1.8rem);
+    user-select: none;
+    background: linear-gradient(135deg, var(--dark_green) 0%, var(--light_green) 45%, #22d3ee 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
 .Nav:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 40px var(--shadow-light);

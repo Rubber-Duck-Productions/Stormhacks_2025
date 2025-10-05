@@ -103,8 +103,8 @@ const LandingPage: React.FC = () => {
         <div>
           <Link to="/"><button className="font Home b1">Home</button></Link>
         </div>
+        <div className="NavTitle">LUX AI</div>
         <div className="Logs">
-          {/* login and signup */}
           <button className="font b1">Anonymous</button>
           <button className="font b1">Log In</button>
         </div>
