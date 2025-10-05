@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 dotenv.config();
@@ -15,7 +16,14 @@ app.use(cors());
 app.use(express.json());
 
 
-app.use(express.static(path.join(__dirname, '..')));
+// Serve built frontend if present (production build), otherwise serve repo root for dev files
+const staticDir = path.join(__dirname, '..', 'dist');
+const fallbackStatic = path.join(__dirname, '..');
+if (fs.existsSync(staticDir)) {
+  app.use(express.static(staticDir));
+} else {
+  app.use(express.static(fallbackStatic));
+}
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
