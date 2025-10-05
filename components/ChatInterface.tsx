@@ -91,7 +91,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <span className="text-slate-100 font-semibold">Tessa</span>
+                <span className="text-slate-100 font-semibold">Lux</span>
                 <span className="inline-flex items-center space-x-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                   <span className="text-emerald-300 text-xs">online</span>
@@ -164,7 +164,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
                 <div className="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></div>
                 <div className="w-2 h-2 rounded-full bg-sky-400 animate-pulse [animation-delay:0.2s]"></div>
                 <div className="w-2 h-2 rounded-full bg-sky-400 animate-pulse [animation-delay:0.4s]"></div>
-                <span className="text-slate-400 text-sm ml-2">Tessa is thinking...</span>
+                <span className="text-slate-400 text-sm ml-2">Lux is thinking...</span>
               </div>
             </div>
           </div>
