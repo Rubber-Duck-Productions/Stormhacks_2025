@@ -292,3 +292,13 @@ footer {
     border-top: 1px solid rgba(255, 255, 255, 0.1); /* subtle divider */
     letter-spacing: 0.3px;
   }
+  p{
+    font-family: "Gabarito";
+  }
+ a {
+    color: var(--white);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+  }
+ 
