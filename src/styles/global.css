@@ -1,0 +1,226 @@
+/* corrected for CSS custom properties to apply globally */
+:root {
+    --white: rgb(248, 247, 244);
+    --purple: rgb(186, 166, 221);
+    --blue: rgb(150, 191, 238);
+    --dark_green: #366F37;
+    --light_green: #82A92D;
+    --muted: #6b6b6b;
+    --text-dark: #222;
+    --shadow-light: rgba(0, 0, 0, 0.08);
+    --shadow-medium: rgba(0, 0, 0, 0.12);
+    --shadow-heavy: rgba(0, 0, 0, 0.18);
+    --shadow-purple: rgba(186, 166, 221, 0.25);
+    --shadow-blue: rgba(150, 191, 238, 0.25);
+    --gradient-primary: linear-gradient(135deg, var(--purple) 0%, var(--blue) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--dark_green) 0%, var(--light_green) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    --border-radius-sm: 0.75rem;
+    --border-radius-md: 1rem;
+    --border-radius-lg: 1.5rem;
+    --border-radius-xl: 2rem;
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+body {
+    background: linear-gradient(135deg, var(--white) 0%, rgba(186, 166, 221, 0.03) 50%, rgba(150, 191, 238, 0.02) 100%);
+    min-height: 100vh;
+    font-family: 'Inter', 'Gabarito', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text-dark);
+    line-height: 1.6;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+.marquee-banner {
+    font-size: 0.875rem;
+    padding: var(--spacing-sm) 0;
+    overflow: hidden;
+    user-select: none;
+    font-family: 'Inter', sans-serif;
+    color: var(--white);
+    background: var(--gradient-secondary);
+    font-weight: 500;
+    box-shadow: 0 4px 20px var(--shadow-blue);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.marquee-banner ul {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+    width: max-content;
+    animation: slide 30s ease-in-out infinite;
+}
+
+.marquee-banner li {
+    flex: 0 0 100%;
+    text-align: center;
+    white-space: nowrap;
+}
+
+@keyframes slide {
+    0%   { transform: translateX(0%); }
+    10%  { transform: translateX(0%); }
+    20%  { transform: translateX(-100%); }
+    30%  { transform: translateX(-100%); }
+    40%  { transform: translateX(-200%); }
+    50%  { transform: translateX(-200%); }
+    60%  { transform: translateX(-300%); }
+    70%  { transform: translateX(-300%); }
+    80%  { transform: translateX(-400%); }
+    90%  { transform: translateX(-400%); }
+    100% { transform: translateX(-500%); }
+}
+
+.nav-container {
+    margin-top: var(--spacing-md);
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    position: relative;
+    align-items: center;
+    margin-left: var(--spacing-sm);
+    margin-right: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 8px 32px var(--shadow-light);
+    border: 1px solid rgba(186, 166, 221, 0.15);
+    transition: var(--transition-smooth);
+}
+
+.nav-button {
+    background: var(--gradient-primary);
+    border-radius: 2rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    color: var(--white);
+    border: none;
+    box-shadow: 0 4px 16px var(--shadow-purple);
+    transition: var(--transition-smooth);
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-decoration: none;
+    letter-spacing: 0.025em;
+}
+
+.nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--shadow-purple);
+    background: linear-gradient(135deg, rgba(186, 166, 221, 0.9) 0%, var(--purple) 100%);
+}
+
+.main-content {
+    margin: var(--spacing-lg) 5%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-xl) var(--spacing-lg);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    border-radius: var(--border-radius-xl);
+    box-shadow: 0 12px 40px var(--shadow-light);
+    border: 1px solid rgba(186, 166, 221, 0.15);
+    transition: var(--transition-smooth);
+}
+
+.main-content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 48px var(--shadow-light);
+}
+
+.main-heading {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    text-align: center;
+    margin: 0;
+    color: var(--dark_green);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    font-family: 'Inter', sans-serif;
+}
+
+.main-subheading {
+    margin-top: var(--spacing-sm);
+    font-size: 1.125rem;
+    color: var(--muted);
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 600px;
+    text-align: center;
+}
+
+.start-button {
+    font-family: 'Inter', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2.5rem;
+    min-width: 12rem;
+    font-size: 1rem;
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+    background: var(--gradient-primary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 8px 24px var(--shadow-purple);
+    transition: var(--transition-smooth);
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    text-decoration: none;
+}
+
+.start-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px var(--shadow-purple);
+    background: linear-gradient(135deg, rgba(186, 166, 221, 0.9) 0%, var(--purple) 100%);
+}
+
+/* Chat interface styles */
+.chat-container {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    border-radius: var(--border-radius-xl);
+    box-shadow: 0 12px 40px var(--shadow-light);
+    border: 1px solid rgba(186, 166, 221, 0.15);
+    padding: var(--spacing-lg);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition-smooth);
+}
+
+/* small helper for summaries menu toggling */
+#summariesMenu {
+    display: none;
+}
+#summariesMenu.show {
+    display: block !important;
+}
+
+/* ensure summaries menu sits above other UI layers */
+#summariesMenu {
+    z-index: 99999;
+}
