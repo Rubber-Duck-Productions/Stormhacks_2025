@@ -89,7 +89,7 @@ html, body{
 }
 .font{letter-spacing:0.3px;text-align:center}
 .Home{
-    font-size: 16pt;
+    font-size: 12pt;
     font-weight: bold;
 }
 .Logs{
@@ -118,7 +118,7 @@ button:hover{
     background: linear-gradient(135deg, rgba(186, 166, 221, 0.9) 0%, var(--purple) 100%);
 }
 .MainContent{
-    margin: 5%;
+    margin: 2%;
     display:flex;
     flex-direction: column;
     justify-content: center;
@@ -139,17 +139,17 @@ button:hover{
     color: var(--dark_green);
 
 }
-.head{
-    font-size: 8rem; 
+h1.head{
+    font-size:75pt; 
     text-align:center;
     margin:0;
     color: var(--dark_green);
     font-weight: 800;
     letter-spacing: -0.02em;
 }
-.sub{margin-top:0;font-size:14pt;color:var(--muted)}
+.sub{margin-top:0;font-size:19pt;color:var(--muted)}
 img{
-    width: 60%;
+    width: 80%;
     border-radius: 1rem;
     margin-bottom: 1rem;
     box-shadow: 0 8px 25px var(--shadow-medium);
