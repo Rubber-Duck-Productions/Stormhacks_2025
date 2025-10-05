@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chat + TTS Test</title>
+  <style>body{font-family:Arial;margin:16px}#messages{border:1px solid #ddd;padding:12px;height:240px;overflow:auto}input{width:70%}button{margin-left:8px}</style>
+</head>
+<body>
+  <h3>Chat + TTS</h3>
+  <div id="messages"></div>
+  <div style="margin-top:8px">
+    <input id="msg" placeholder="Type a message" />
+    <button id="send">Send</button>
+  </div>
+  <audio id="player" controls style="margin-top:8px;display:block"></audio>
+  <script>
+    const messages = document.getElementById('messages');
+    const player = document.getElementById('player');
+    function append(who, text){ const d=document.createElement('div'); d.textContent=`${who}: ${text}`; messages.appendChild(d); messages.scrollTop=messages.scrollHeight; }
+
+    document.getElementById('send').addEventListener('click', async ()=>{
+      const input = document.getElementById('msg');
+      const text = input.value.trim(); if(!text) return;
+      append('You', text); input.value='';
+      try{
+        const r = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: text }) });
+        const j = await r.json();
+        append('Bot', j.text || '');
+        if (j.audio) { player.src = j.audio; player.play(); }
+      }catch(e){ append('Error', e.message); }
+    });
+  </script>
+</body>
+</html>

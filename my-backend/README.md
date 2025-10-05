@@ -35,8 +35,3 @@ Notes
 
 - /api/weather supports: `city`, `lat`+`lon`, `ip`, or `useIp=true` to auto-resolve by the request IP.
 - Uses Open-Meteo (no API key) and Nominatim for geocoding.
-
-Environment
-------------
-Create a `.env` file in this folder (copy from `.env.example`) to set `PORT` or other variables. `.env` is ignored by git.
-

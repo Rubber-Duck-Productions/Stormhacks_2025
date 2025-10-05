@@ -16,14 +16,24 @@ app.use(cors());
 app.use(express.json());
 
 
-// Serve built frontend if present (production build), otherwise serve repo root for dev files
-const staticDir = path.join(__dirname, '..', 'dist');
-const fallbackStatic = path.join(__dirname, '..');
-if (fs.existsSync(staticDir)) {
-  app.use(express.static(staticDir));
-} else {
-  app.use(express.static(fallbackStatic));
-}
+// Serve built frontend if present (production). Use repo root as fallback for development.
+const distPath = path.join(__dirname, '..', 'dist');
+const publicPath = fs.existsSync(distPath) ? distPath : path.join(__dirname, '..');
+// Serve static files and ensure common module/script files get the correct Content-Type
+app.use(express.static(publicPath, {
+  setHeaders: (res, filePath) => {
+    try {
+      const ext = path.extname(filePath).toLowerCase();
+      if (ext === '.js' || ext === '.mjs') {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      } else if (ext === '.wasm') {
+        res.setHeader('Content-Type', 'application/wasm');
+      }
+    } catch (e) {
+      // fail silently; don't block serving files
+    }
+  }
+}));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -124,7 +134,7 @@ app.get('/api/weather', async (req, res) => {
         lon = geo.lon;
         city = city || geo.display_name;
       } else {
-        // resolve via ip-api using provided ip or client IP
+    
         const clientIp = ip || getClientIp(req) || '';
         const ipUrl = clientIp ? `http://ip-api.com/json/${encodeURIComponent(clientIp)}` : `http://ip-api.com/json`;
         const ipData = await cached(`ip:${clientIp}`, 60_000, async () => {
@@ -139,12 +149,12 @@ app.get('/api/weather', async (req, res) => {
       }
     }
 
-    // ensure numeric
+
     lat = Number(lat);
     lon = Number(lon);
     if (!isFinite(lat) || !isFinite(lon)) return res.status(400).json({ error: 'Invalid coordinates' });
 
-    // Fetch weather with caching for a short TTL
+  
     const weatherKey = `weather:${lat.toFixed(3)}:${lon.toFixed(3)}`;
     const weatherData = await cached(weatherKey, 30_000, async () => {
       const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current_weather=true&timezone=auto&temperature_unit=celsius&windspeed_unit=kmh`;
@@ -175,15 +185,114 @@ app.get('/api/weather', async (req, res) => {
   }
 });
 
-// Fallback: return JSON for unknown API routes, otherwise serve index.html for client routes
+app.post('/api/tts', async (req, res) => {
+  try {
+    const { text, voice } = req.body || {};
+    if (!text || typeof text !== 'string' || !text.trim()) return res.status(400).json({ error: 'Provide `text` in request body' });
+
+    const key = process.env.ELEVENLABS_API_KEY || process.env.ELEVEN_API_KEY;
+    if (!key) return res.status(503).json({ error: 'ELEVENLABS_API_KEY not configured on server' });
+
+    const voiceId = voice || process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM';
+    const url = `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}`;
+
+    const body = {
+      text: text,
+      
+      voice_settings: {
+        stability: 0.6,
+        similarity_boost: 0.75
+      }
+    };
+
+    const ttsRes = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'audio/mpeg',
+        'xi-api-key': key
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!ttsRes.ok) {
+      const txt = await ttsRes.text();
+      console.error('ElevenLabs TTS failed', ttsRes.status, txt);
+      return res.status(502).json({ error: 'TTS provider error', status: ttsRes.status, details: txt });
+    }
+
+  
+    const arr = await ttsRes.arrayBuffer();
+    const buffer = Buffer.from(arr);
+    res.setHeader('Content-Type', 'audio/mpeg');
+    res.setHeader('Content-Length', buffer.length);
+    res.send(buffer);
+  } catch (err) {
+    console.error('tts error', err);
+    res.status(500).json({ error: 'Internal error' });
+  }
+});
+
+
+app.post('/api/chat', async (req, res) => {
+  try {
+    const { message, voice } = req.body || {};
+    if (!message || typeof message !== 'string') return res.status(400).json({ error: 'Provide a `message` string in the body' });
+
+   
+    let chatbotText = null;
+    try {
+      const key = process.env.GEMINI_API_KEY || process.env.API_KEY;
+      if (key) {
+        const { GoogleGenAI } = await import('@google/genai');
+        const ai = new GoogleGenAI({ apiKey: key });
+        const prompt = `You are Zenith, a caring and empathetic AI therapist. The user said: "${message}". Provide a concise, supportive response.`;
+        const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt });
+        chatbotText = response?.text?.trim();
+      }
+    } catch (err) {
+      console.error('genai error', err);
+    }
+
+   
+    if (!chatbotText) chatbotText = `I heard: ${message}. I'm here to listen.`;
+
+    
+    const elevenKey = process.env.ELEVENLABS_API_KEY || process.env.ELEVEN_API_KEY;
+    console.log('/api/chat: elevenKey present?', !!elevenKey);
+    if (!elevenKey) {
+      return res.json({ text: chatbotText, audio: null, warning: 'ELEVENLABS_API_KEY not configured' });
+    }
+    const voiceId = voice || process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM';
+    const ttsUrl = `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}`;
+    const ttsBody = { text: chatbotText, voice_settings: { stability: 0.6, similarity_boost: 0.75 } };
+    const ttsRes = await fetch(ttsUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'audio/mpeg', 'xi-api-key': elevenKey }, body: JSON.stringify(ttsBody) });
+    if (!ttsRes.ok) {
+      const txt = await ttsRes.text();
+      console.error('ElevenLabs TTS failed', ttsRes.status, txt && txt.slice ? txt.slice(0,200) : txt);
+      return res.status(502).json({ error: 'TTS provider error', details: txt, text: chatbotText });
+    }
+    const arr = await ttsRes.arrayBuffer();
+    const buffer = Buffer.from(arr);
+    const base64 = buffer.toString('base64');
+    const dataUrl = `data:audio/mpeg;base64,${base64}`;
+
+    res.json({ text: chatbotText, audio: dataUrl });
+  } catch (err) {
+    console.error('chat error', err);
+    res.status(500).json({ error: 'Internal error' });
+  }
+});
+
+
 app.get(/.*/, (req, res) => {
   try {
-    // If the request targets /api/*, return a proper JSON 404
+    
     if (req.path && req.path.startsWith('/api')) {
       return res.status(404).json({ error: 'API endpoint not found' });
     }
 
-    // If client explicitly prefers JSON, return 404 JSON instead of HTML
+
     const accept = (req.headers['accept'] || '').toLowerCase();
     if (accept.includes('application/json')) {
       return res.status(404).json({ error: 'Not found' });

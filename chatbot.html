@@ -45,6 +45,13 @@
               <button type="button" id="file-upload" class="material-symbols-rounded">attach_file</button>
               <button type="button" id="file-cancel" class="material-symbols-rounded">close</button>
             </div>
+            <select id="voice-select" title="Voice" style="margin-right:8px">
+              <option value="21m00Tcm4TlvDq8ikWAM">ElevenLabs: Rachel (default)</option>
+              <option value="AZnzlk1XvdvUeBnXmlld">ElevenLabs: Antonia</option>
+              <option value="ErXwobaYiN019PkySvjV">ElevenLabs: Josh</option>
+              <option value="EXAVITQu4vr4xnSDxMaL">ElevenLabs: Bella</option>
+            </select>
+            <button type="button" id="mic-button" title="Record voice" class="material-symbols-rounded">mic</button>
             <button type="submit" id="send-message" class="material-symbols-rounded">arrow_upward</button>
           </div>
         </form>
@@ -54,6 +61,180 @@
 
   <script src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
   <script src="chatbot V1.js"></script>
+
+  <!-- Chat + TTS integration: hook the existing form to /api/chat -->
+  <script>
+    (function(){
+      // debug log element
+      let debugEl = document.getElementById('chat-debug');
+      if (!debugEl) {
+        debugEl = document.createElement('pre');
+        debugEl.id = 'chat-debug';
+        debugEl.style.cssText = 'position:fixed;right:12px;bottom:12px;max-width:320px;max-height:40vh;overflow:auto;background:#111;color:#fff;padding:8px;border-radius:6px;opacity:0.9;z-index:9999;font-size:12px';
+        document.body.appendChild(debugEl);
+      }
+      const form = document.querySelector('.chat-form');
+      const textarea = document.querySelector('.message-input');
+      const chatBody = document.querySelector('.chat-body');
+
+      // add an audio player for TTS
+      let audioEl = document.getElementById('tts-audio');
+      if (!audioEl) {
+        audioEl = document.createElement('audio');
+        audioEl.id = 'tts-audio';
+        audioEl.controls = true;
+        audioEl.style.display = 'none';
+        document.body.appendChild(audioEl);
+      }
+
+      function appendMessage(who, text){
+        const wrapper = document.createElement('div');
+        wrapper.className = 'message ' + (who === 'bot' ? 'bot-message' : 'user-message');
+        if (who === 'bot'){
+          // keep similar structure to existing bot-message
+          const img = document.createElement('img');
+          img.className = 'chatbot-logo';
+          img.src = 'images/yomi.webp';
+          img.alt = 'Logo';
+          img.width = 60;
+          img.height = 60;
+          wrapper.appendChild(img);
+        }
+        const div = document.createElement('div');
+        div.className = 'message-text';
+        div.innerHTML = text.replace(/\n/g, '<br/>');
+        wrapper.appendChild(div);
+        chatBody.appendChild(wrapper);
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }
+
+      async function sendMessage(text){
+        appendMessage('user', text);
+        try{
+          const voiceSelect = document.getElementById('voice-select');
+          const voice = voiceSelect ? voiceSelect.value : undefined;
+          const res = await fetch('/api/chat', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ message: text, voice }) });
+          if (!res.ok){
+            const t = await res.text();
+            appendMessage('bot', 'Error: ' + t);
+            return;
+          }
+          const bodyText = await res.text();
+          let j = null;
+          try { j = JSON.parse(bodyText); } catch(e){ debugEl.textContent = 'Non-JSON response:\n' + bodyText; }
+          if (j){
+            debugEl.textContent = JSON.stringify(j, null, 2);
+            if (j.text) appendMessage('bot', j.text);
+          }
+          if (j.audio){
+            try{
+              audioEl.src = j.audio;
+              audioEl.style.display = 'block';
+              await audioEl.play();
+            }catch(e){ console.warn('audio play failed', e); }
+          }
+        }catch(e){
+          appendMessage('bot', 'Error contacting chat service');
+        }
+      }
+
+      // preserve default submit behavior for other handlers: intercept and use sendMessage
+      form.addEventListener('submit', function(ev){
+        ev.preventDefault();
+        const text = textarea.value.trim();
+        if (!text) return;
+        textarea.value = '';
+        sendMessage(text);
+      });
+
+      // Enter to send (Shift+Enter for newline)
+      textarea.addEventListener('keydown', function(ev){
+        if (ev.key === 'Enter' && !ev.shiftKey){
+          ev.preventDefault();
+          const text = textarea.value.trim();
+          if (!text) return;
+          textarea.value = '';
+          sendMessage(text);
+        }
+      });
+
+      // autofocus textarea
+      textarea.setAttribute('autofocus', 'true');
+      textarea.focus();
+
+      // also hook send button if present
+      const sendBtn = document.getElementById('send-message');
+      if (sendBtn){
+        sendBtn.addEventListener('click', function(ev){
+          ev.preventDefault();
+          const text = textarea.value.trim();
+          if (!text) return;
+          textarea.value = '';
+          sendMessage(text);
+        });
+      }
+
+      // Speech-to-text (browser) via Web Speech API
+      const micBtn = document.getElementById('mic-button');
+      let recognition = null;
+      let recognizing = false;
+      if (micBtn) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+          micBtn.disabled = true;
+          micBtn.title = 'Speech recognition not supported in this browser';
+        } else {
+          recognition = new SpeechRecognition();
+          recognition.lang = 'en-US';
+          recognition.interimResults = true;
+          recognition.maxAlternatives = 1;
+
+          let interim = '';
+
+          recognition.onstart = () => {
+            recognizing = true;
+            micBtn.textContent = 'mic_off';
+            micBtn.classList.add('recording');
+          };
+          recognition.onend = () => {
+            recognizing = false;
+            micBtn.textContent = 'mic';
+            micBtn.classList.remove('recording');
+          };
+          recognition.onerror = (e) => {
+            console.warn('recognition error', e);
+            recognizing = false;
+            micBtn.textContent = 'mic';
+            micBtn.classList.remove('recording');
+          };
+          recognition.onresult = (ev) => {
+            interim = '';
+            let finalTranscript = '';
+            for (let i = ev.resultIndex; i < ev.results.length; ++i) {
+              if (ev.results[i].isFinal) finalTranscript += ev.results[i][0].transcript;
+              else interim += ev.results[i][0].transcript;
+            }
+            // show interim in textarea (without replacing final content)
+            textarea.value = (finalTranscript || '') + (interim ? '\n' + interim : '');
+          };
+
+          micBtn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            if (!recognition) return;
+            if (recognizing) {
+              recognition.stop();
+            } else {
+              try {
+                recognition.start();
+              } catch (e) {
+                console.warn('recognition start error', e);
+              }
+            }
+          });
+        }
+      }
+    })();
+  </script>
 
       <footer>
 

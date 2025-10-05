@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TTS Test</title>
+  <style>body{font-family:Arial;margin:20px}textarea{width:100%;height:120px}</style>
+</head>
+<body>
+  <h3>ElevenLabs TTS Test</h3>
+  <p>Requires server env <code>ELEVENLABS_API_KEY</code> to be set.</p>
+  <textarea id="text">Hello from Zenith. This is a test of the Eleven Labs voice API.</textarea>
+  <div style="margin-top:8px">
+    <button id="speak">Speak (server TTS)</button>
+    <audio id="audio" controls></audio>
+  </div>
+  <pre id="log"></pre>
+  <script>
+    const log = document.getElementById('log');
+    function l(x){ log.textContent = typeof x === 'string' ? x : JSON.stringify(x,null,2); }
+
+    document.getElementById('speak').addEventListener('click', async ()=>{
+      l('Requesting...');
+      const text = document.getElementById('text').value;
+      try{
+        const r = await fetch('/api/tts', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ text }) });
+        if (!r.ok) { l(await r.text()); return }
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = document.getElementById('audio');
+        audio.src = url;
+        audio.play();
+        l('Playing audio');
+      }catch(e){ l('Error: '+e.message); }
+    });
+  </script>
+</body>
+</html>
