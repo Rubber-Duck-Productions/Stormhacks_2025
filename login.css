@@ -15,7 +15,19 @@
 *{box-sizing: border-box}
 html,body{height:100%;margin:0}
 body{
-    background: linear-gradient(135deg, var(--white) 0%, rgba(186, 166, 221, 0.05) 100%);
+    background-image: url('./assets/paul-summers-ArtVJ-217Cw-unsplash.jpg');
+    /* Cover the entire area without stretching */
+    background-size: cover;
+    /* Center the image */
+    background-position: center;
+    /* Make it fixed while scrolling (optional) */
+    background-attachment: fixed;
+    /* Fallback background color */
+    background-color: #f0f0f0;
+    /* Remove default margin */
+    margin: 0;
+    /* Ensure it takes full viewport height */
+    height: 100vh;
     font-family: 'Gabarito', system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
     color: var(--text);
     display:flex;
