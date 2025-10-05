@@ -215,6 +215,7 @@ p{
 
 /* ThirdContent removed */
 .ThirdContent{
+    margin-top: 2rem;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -226,6 +227,23 @@ p{
 
 h2{
     text-align: center;
+}
+.text3{
+    display:flex;
+    flex-direction: column;
+    max-width: 500px;
+    text-align: center;
+    gap: 0rem;
+}
+.text3>p{
+    margin-top: 0;
+}
+.img3{
+    width: 50%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 1rem;
+
 }
 
 
