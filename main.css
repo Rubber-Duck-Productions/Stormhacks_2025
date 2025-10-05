@@ -350,6 +350,8 @@ footer {
     flex-wrap: wrap;
     background-color: rgb(0, 52, 1);
     padding: 60px 10%;
+    margin:0;
+    border-radius: 2rem;
   }
   
   .footer-col {
