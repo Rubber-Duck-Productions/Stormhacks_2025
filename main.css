@@ -213,3 +213,19 @@ p{
     font-size:14pt;
 }
 
+/* ThirdContent removed */
+.ThirdContent{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+h2{
+    text-align: center;
+}
+
+
