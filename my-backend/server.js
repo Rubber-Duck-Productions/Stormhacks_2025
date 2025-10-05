@@ -204,6 +204,28 @@ app.post('/api/summarize', async (req, res) => {
   }
 });
 
+// Proxy ElevenLabs voices list
+app.get('/api/voices', async (req, res) => {
+  try {
+    const key = process.env.ELEVENLABS_API_KEY || process.env.ELEVEN_API_KEY;
+    if (!key) return res.status(503).json({ error: 'ELEVENLABS_API_KEY not configured on server' });
+
+    const url = 'https://api.elevenlabs.io/v1/voices';
+    const r = await fetch(url, { headers: { 'xi-api-key': key } });
+    if (!r.ok) {
+      const txt = await r.text();
+      console.error('voices fetch failed', r.status, txt);
+      return res.status(502).json({ error: 'Voices fetch failed', status: r.status, details: txt });
+    }
+    const body = await r.json();
+    // return raw list to client
+    res.json(body);
+  } catch (err) {
+    console.error('voices error', err);
+    res.status(500).json({ error: 'Internal error' });
+  }
+});
+
 // Fallback: return JSON for unknown API routes, otherwise serve index.html for client routes
 app.get(/.*/, (req, res) => {
   try {

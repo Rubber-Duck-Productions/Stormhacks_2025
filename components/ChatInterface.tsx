@@ -22,6 +22,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
   const [voiceLanguage, setVoiceLanguage] = useState('en-US');
   const [summaries, setSummaries] = useState<string[]>([]);
   const [isSummarizing, setIsSummarizing] = useState(false);
+  const [ttsEnabled, setTtsEnabled] = useState<boolean>(true);
+  const lastSpokenRef = useRef<string | null>(null);
+  const [voices, setVoices] = useState<any[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState<string | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const voiceServiceRef = useRef<VoiceRecognitionService | null>(null);
@@ -106,6 +110,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
   useEffect(() => {
     const arr = loadSummariesFromStorage();
     if (arr && arr.length) setSummaries(arr);
+    try {
+      const raw = localStorage.getItem('tts_enabled');
+      if (raw !== null) setTtsEnabled(raw === '1');
+      const sv = localStorage.getItem('eleven_voice_id');
+      if (sv) setSelectedVoice(sv);
+    } catch (e) {}
   }, []);
 
   // Manual summarization to avoid auto-calls
@@ -139,6 +149,83 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
       setIsSummarizing(false);
     }
   };
+
+  // persist TTS preference
+  useEffect(() => {
+    try { localStorage.setItem('tts_enabled', ttsEnabled ? '1' : '0'); } catch (e) {}
+  }, [ttsEnabled]);
+
+  // speak a text using server-side TTS (/api/tts) if available, otherwise fallback to Web Speech API
+  const speakText = async (text: string) => {
+    if (!text || !text.trim()) return;
+    // Try server-side ElevenLabs TTS
+    try {
+      const resp = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voice: selectedVoice })
+      });
+      if (resp.ok) {
+        const arrayBuffer = await resp.arrayBuffer();
+        const blob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        // try play and revoke url afterwards
+        await audio.play();
+        audio.addEventListener('ended', () => { try { URL.revokeObjectURL(url); } catch (e) {} });
+        return;
+      }
+    } catch (e) {
+      console.warn('server TTS failed, falling back to speechSynthesis', e);
+    }
+
+    // Fallback: use browser SpeechSynthesis
+    try {
+      if ('speechSynthesis' in window) {
+        const utter = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utter);
+      }
+    } catch (e) {
+      console.warn('speechSynthesis failed', e);
+    }
+  };
+
+  // load available voices from server
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch('/api/voices');
+        if (!r.ok) return;
+        const body = await r.json();
+        const list = Array.isArray(body.voices) ? body.voices : (body as any[]);
+        setVoices(list || []);
+        // try to pick a reasonable british female default if none selected
+        if (!selectedVoice && list && list.length) {
+          const br = list.find((v:any) => /british|uk|en-?gb/i.test((v.name || v.voice || '') ) && /female|woman/i.test((v.gender || v.voice_gender || '') + '')) || list.find((v:any) => /female|woman/i.test((v.gender || v.voice_gender || '') + ''));
+          if (br) {
+            setSelectedVoice(br.id || br.voice_id || br.voice || br.name);
+            try { localStorage.setItem('eleven_voice_id', (br.id || br.voice_id || br.voice || br.name) as string); } catch (e) {}
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load voices', e);
+      }
+    })();
+  }, []);
+
+  // When new messages arrive, speak the latest assistant reply if TTS is enabled
+  useEffect(() => {
+    if (!ttsEnabled) return;
+    if (!messages || messages.length === 0) return;
+    const last = messages[messages.length - 1];
+    if (last.role !== 'model') return;
+    // avoid repeating same speech
+    if (lastSpokenRef.current === last.content) return;
+    lastSpokenRef.current = last.content;
+    // play asynchronously (no await to avoid blocking UI)
+    speakText(last.content).catch(e => console.error('speakText error', e));
+  }, [messages, ttsEnabled]);
 
   const toggleVoiceRecognition = useCallback(() => {
     if (!voiceServiceRef.current) return;
@@ -183,6 +270,18 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
           </div>
           <div className="hidden sm:flex items-center space-x-2 text-slate-400">
             <div className="relative">
+              {/* Voice selector (prefers ElevenLabs voices) */}
+              <select
+                value={selectedVoice || ''}
+                onChange={(e) => { setSelectedVoice(e.target.value); try { localStorage.setItem('eleven_voice_id', e.target.value); } catch (e) {} }}
+                className="mr-2 bg-slate-700/40 text-slate-100 px-2 py-1 rounded-md text-sm"
+                title="Select TTS voice"
+              >
+                <option value="">Default voice</option>
+                {voices.map(v => (
+                  <option key={v.id || v.voice || v.name} value={v.id || v.voice || v.name}>{v.name || v.voice || v.id}</option>
+                ))}
+              </select>
               <button
                 type="button"
                 className="text-slate-300 hover:text-white hover:bg-slate-700/60 px-3 py-1 rounded-md"
@@ -203,6 +302,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
                 title="Generate a short summary of the conversation"
               >
                 {isSummarizing ? 'Summarizing…' : 'Summarize'}
+              </button>
+              {/* TTS toggle */}
+              <button
+                type="button"
+                onClick={() => setTtsEnabled(v => !v)}
+                className={`ml-2 px-3 py-1 rounded-md text-sm ${ttsEnabled ? 'bg-emerald-600 text-white' : 'bg-slate-700/30 text-slate-300'}`}
+                title={ttsEnabled ? 'Disable speech' : 'Enable speech'}
+              >
+                {ttsEnabled ? 'Voice On' : 'Voice Off'}
               </button>
               <div id="summariesMenu" className="absolute right-0 mt-2 w-64 bg-slate-800/95 border border-slate-700 rounded-lg shadow-lg p-2 hidden z-40">
                 {summaries.length === 0 && <div className="text-slate-400 text-sm px-2 py-1">No summaries yet</div>}
