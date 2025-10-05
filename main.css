@@ -226,8 +226,8 @@ img:hover{
     .ThirdContent{
         flex-direction: column;
         gap: 2rem;
-        margin: 2rem 1rem;
-        padding: 2rem 1rem;
+        margin: 2rem 5%;
+        padding: 2rem 5%;
     }
     .img3{
         width: 80%;
@@ -315,9 +315,8 @@ p{
     justify-content: center;
     align-items: center;
     gap: 3rem;
-    max-width: 1000px;
-    margin: 3rem auto;
-    padding: 3rem 2rem;
+    margin: 2rem 5%;
+    padding: 3rem 5%;
     background-color: var(--white);
     border-radius: 2rem;
     box-shadow: 0 8px 32px var(--shadow-light);
