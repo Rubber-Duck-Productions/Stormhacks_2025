@@ -111,7 +111,7 @@ const LandingPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="MainContent">
+      <div className="MainContent hero-card">
         <div className="text">
           <h1 className="font head gradient-text">Therapy, Reinvented</h1>
           <p className="font sub">Experience compassionate AI therapy with advanced voice recognition and facial expression analysis. Your mental health journey starts here.</p>
