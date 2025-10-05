@@ -156,7 +156,6 @@ button:hover{
     transition: all 0.3s ease;
     position: relative;
     z-index: 1;
-    gap: 0.45rem;
 }
 
 .SecondContent > div:hover{
@@ -199,7 +198,7 @@ button:hover{
     justify-content: center;
     align-items: center;
     align-content: center;
-    gap: 0.45rem; /* tighter gap between image and text */
+    gap: 0rem; /* tighter gap between image and text */
     width: 100%;
     background-color: var(--white);
     border-radius: 2rem;
@@ -209,6 +208,7 @@ p{
     font-size:14pt;
     line-height: 1.6;
     color: var(--dark_green);
+    margin-top: 0;
 }
 
 /* small top margin for feature paragraphs so they sit close to images */
@@ -216,7 +216,6 @@ p{
 img{
     width: 60%;
     border-radius: 1rem;
-    margin-bottom: 1rem;
     box-shadow: 0 8px 25px var(--shadow-medium);
     transition: transform 0.3s ease;
 }
@@ -231,7 +230,7 @@ img:hover{
     object-fit: cover;
     border-radius: 0.75rem;
     display: block;
-    margin: 0 auto 0.35rem auto; /* tightened gap */
+  
     box-shadow: 0 4px 15px var(--shadow-light);
     transition: transform 0.3s ease;
 }
