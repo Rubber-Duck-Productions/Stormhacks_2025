@@ -39,11 +39,13 @@ body{
 .login-card{
     width: 100%;
     max-width: 420px;
-    background: linear-gradient(135deg, rgba(186,166,221,0.05) 0%, rgba(150,191,238,0.02) 100%);
+    background: rgba(255,255,255,0.45); /* translucent card */
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
     padding: 2rem;
     border-radius: 14px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-    border: 1px solid rgba(186,166,221,0.55); /* stronger purple accent border */
+    border: 1px solid rgba(186,166,221,0.35); /* toned-down accent border */
     display:flex;
     flex-direction: column;
     gap: 1rem;
