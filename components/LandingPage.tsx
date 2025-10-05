@@ -39,7 +39,7 @@ const LandingPage: React.FC = () => {
           Your browser does not support the video tag.
         </video>
 
-        <Link to="/therapy">
+        <Link to="/chatbot">
           <button className="Jump1">
             <p className="button1">Start Now</p>
           </button>
@@ -90,7 +90,7 @@ const LandingPage: React.FC = () => {
         </div>
         <div className="footer-col">
           <p>Chatbot</p>
-          <Link to="/therapy">Try Now</Link>
+          <Link to="/chatbot">Try Now</Link>
         </div>
         <div className="footer-bottom">
           <p><i className="far fa-copyright"></i> 2025 Rubber Duck Productions. All rights reserved.</p>
