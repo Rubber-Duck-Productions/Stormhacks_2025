@@ -20,6 +20,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
   });
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [voiceLanguage, setVoiceLanguage] = useState('en-US');
+  const [summaries, setSummaries] = useState<string[]>([]);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [ttsEnabled, setTtsEnabled] = useState<boolean>(true);
+  const lastSpokenRef = useRef<string | null>(null);
+  const [voices, setVoices] = useState<any[]>([]);
+  const [selectedVoice, setSelectedVoice] = useState<string | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const voiceServiceRef = useRef<VoiceRecognitionService | null>(null);
@@ -58,6 +64,168 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
       voiceServiceRef.current.setLanguage(voiceLanguage);
     }
   }, [voiceLanguage]);
+
+  // Cookie helpers (simple)
+  // Local storage helpers with optional migration from cookie
+  function loadSummariesFromStorage(): string[] {
+    try {
+      const raw = localStorage.getItem('chat_summaries');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed as string[];
+      }
+    } catch (e) {
+      // fallthrough to cookie migration
+    }
+
+    // migration: check cookie (if older clients stored there)
+    try {
+      const cookie = document.cookie.split('; ').reduce((r, v) => {
+        const parts = v.split('=');
+        return parts[0] === 'chat_summaries' ? decodeURIComponent(parts[1]) : r;
+      }, '');
+      if (cookie) {
+        const parsed = JSON.parse(cookie);
+        if (Array.isArray(parsed)) {
+          // write to localStorage and remove cookie string (cannot reliably delete in all contexts)
+          try { localStorage.setItem('chat_summaries', JSON.stringify(parsed)); } catch (e) {}
+          return parsed as string[];
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+    return [];
+  }
+
+  function saveSummariesToStorage(arr: string[]) {
+    try {
+      localStorage.setItem('chat_summaries', JSON.stringify(arr));
+    } catch (e) {
+      // ignore quota errors
+    }
+  }
+
+  // Load summaries from localStorage (with migration from cookie)
+  useEffect(() => {
+    const arr = loadSummariesFromStorage();
+    if (arr && arr.length) setSummaries(arr);
+    try {
+      const raw = localStorage.getItem('tts_enabled');
+      if (raw !== null) setTtsEnabled(raw === '1');
+      const sv = localStorage.getItem('eleven_voice_id');
+      if (sv) setSelectedVoice(sv);
+    } catch (e) {}
+  }, []);
+
+  // Manual summarization to avoid auto-calls
+  const handleSummarize = async () => {
+    if (isSummarizing) return;
+    if (!messages || messages.length === 0) return;
+    setIsSummarizing(true);
+    try {
+      const resp = await fetch('/api/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages })
+      });
+      if (!resp.ok) {
+        console.error('Summarize request failed', resp.status);
+        return;
+      }
+      const data = await resp.json();
+      const summary = data.summary?.trim();
+      if (summary) {
+        // avoid duplicate consecutive summaries
+        if (summaries.length === 0 || summaries[0] !== summary) {
+          const newSummaries = [summary].concat(summaries).slice(0, 10);
+          setSummaries(newSummaries);
+          saveSummariesToStorage(newSummaries);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch summary', e);
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
+
+  // persist TTS preference
+  useEffect(() => {
+    try { localStorage.setItem('tts_enabled', ttsEnabled ? '1' : '0'); } catch (e) {}
+  }, [ttsEnabled]);
+
+  // speak a text using server-side TTS (/api/tts) if available, otherwise fallback to Web Speech API
+  const speakText = async (text: string) => {
+    if (!text || !text.trim()) return;
+    // Try server-side ElevenLabs TTS
+    try {
+      const resp = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voice: selectedVoice })
+      });
+      if (resp.ok) {
+        const arrayBuffer = await resp.arrayBuffer();
+        const blob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        // try play and revoke url afterwards
+        await audio.play();
+        audio.addEventListener('ended', () => { try { URL.revokeObjectURL(url); } catch (e) {} });
+        return;
+      }
+    } catch (e) {
+      console.warn('server TTS failed, falling back to speechSynthesis', e);
+    }
+
+    // Fallback: use browser SpeechSynthesis
+    try {
+      if ('speechSynthesis' in window) {
+        const utter = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utter);
+      }
+    } catch (e) {
+      console.warn('speechSynthesis failed', e);
+    }
+  };
+
+  // load available voices from server
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch('/api/voices');
+        if (!r.ok) return;
+        const body = await r.json();
+        const list = Array.isArray(body.voices) ? body.voices : (body as any[]);
+        setVoices(list || []);
+        // try to pick a reasonable british female default if none selected
+        if (!selectedVoice && list && list.length) {
+          const br = list.find((v:any) => /british|uk|en-?gb/i.test((v.name || v.voice || '') ) && /female|woman/i.test((v.gender || v.voice_gender || '') + '')) || list.find((v:any) => /female|woman/i.test((v.gender || v.voice_gender || '') + ''));
+          if (br) {
+            setSelectedVoice(br.id || br.voice_id || br.voice || br.name);
+            try { localStorage.setItem('eleven_voice_id', (br.id || br.voice_id || br.voice || br.name) as string); } catch (e) {}
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load voices', e);
+      }
+    })();
+  }, []);
+
+  // When new messages arrive, speak the latest assistant reply if TTS is enabled
+  useEffect(() => {
+    if (!ttsEnabled) return;
+    if (!messages || messages.length === 0) return;
+    const last = messages[messages.length - 1];
+    if (last.role !== 'model') return;
+    // avoid repeating same speech
+    if (lastSpokenRef.current === last.content) return;
+    lastSpokenRef.current = last.content;
+    // play asynchronously (no await to avoid blocking UI)
+    speakText(last.content).catch(e => console.error('speakText error', e));
+  }, [messages, ttsEnabled]);
 
   const toggleVoiceRecognition = useCallback(() => {
     if (!voiceServiceRef.current) return;
@@ -101,6 +269,67 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
             </div>
           </div>
           <div className="hidden sm:flex items-center space-x-2 text-slate-400">
+            <div className="relative">
+              {/* Voice selector (prefers ElevenLabs voices) */}
+              <select
+                value={selectedVoice || ''}
+                onChange={(e) => { setSelectedVoice(e.target.value); try { localStorage.setItem('eleven_voice_id', e.target.value); } catch (e) {} }}
+                className="mr-2 bg-slate-700/40 text-slate-100 px-2 py-1 rounded-md text-sm"
+                title="Select TTS voice"
+              >
+                <option value="">Default voice</option>
+                {voices.map(v => (
+                  <option key={v.id || v.voice || v.name} value={v.id || v.voice || v.name}>{v.name || v.voice || v.id}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                className="text-slate-300 hover:text-white hover:bg-slate-700/60 px-3 py-1 rounded-md"
+                onClick={(e) => {
+                  const el = document.getElementById('summariesMenu');
+                  if (el) el.classList.toggle('show');
+                }}
+                aria-haspopup="true"
+                aria-expanded={summaries.length > 0}
+              >
+                Summaries <span className="ml-1 text-xs">▾</span>
+              </button>
+              <button
+                type="button"
+                className="ml-2 text-slate-200 bg-slate-700/40 hover:bg-slate-700/60 px-3 py-1 rounded-md text-sm"
+                onClick={handleSummarize}
+                disabled={isSummarizing}
+                title="Generate a short summary of the conversation"
+              >
+                {isSummarizing ? 'Summarizing…' : 'Summarize'}
+              </button>
+              {/* TTS toggle */}
+              <button
+                type="button"
+                onClick={() => setTtsEnabled(v => !v)}
+                className={`ml-2 px-3 py-1 rounded-md text-sm ${ttsEnabled ? 'bg-emerald-600 text-white' : 'bg-slate-700/30 text-slate-300'}`}
+                title={ttsEnabled ? 'Disable speech' : 'Enable speech'}
+              >
+                {ttsEnabled ? 'Voice On' : 'Voice Off'}
+              </button>
+              <div id="summariesMenu" className="absolute right-0 mt-2 w-64 bg-slate-800/95 border border-slate-700 rounded-lg shadow-lg p-2 hidden z-40">
+                {summaries.length === 0 && <div className="text-slate-400 text-sm px-2 py-1">No summaries yet</div>}
+                {summaries.map((s, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      // insert summary into chat input
+                      setInput(prev => (prev ? prev + '\n' + s : s));
+                      // close menu
+                      const el = document.getElementById('summariesMenu'); if (el) el.classList.remove('show');
+                    }}
+                    className="w-full text-left text-slate-200 text-sm px-2 py-2 hover:bg-slate-700 rounded-md"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
               <path fillRule="evenodd" d="M10.5 1.5a4 4 0 00-4 4V8H5a2.5 2.5 0 00-2.5 2.5v5A2.5 2.5 0 005 18h10a2.5 2.5 0 002.5-2.5v-5A2.5 2.5 0 0015 8h-1.5V5.5a4 4 0 00-4-4zm-2.5 6.5V5.5a2.5 2.5 0 115 0V8h-5z" clipRule="evenodd" />
             </svg>
