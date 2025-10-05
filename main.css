@@ -378,7 +378,7 @@ footer {
   }
   
   .footer-col a:hover {
-    color: var(--jordy_blue); /* accent color on hover */
+    color: var(--light_green); /* accent color on hover */
   }
   
   .footer-col i {
