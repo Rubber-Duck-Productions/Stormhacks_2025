@@ -24,12 +24,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
     return container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
   };
 
-  useEffect(() => {
-    // Only auto-scroll if user is already near the bottom
-    if (isNearBottom()) {
-      scrollToBottom();
-    }
-  }, [messages]);
+  // Removed auto-scroll behavior - chat will stay in current position
 
   useEffect(() => {
     const container = messagesContainerRef.current;
