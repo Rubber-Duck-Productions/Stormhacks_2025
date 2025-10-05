@@ -258,6 +258,28 @@ img:hover{
         height: auto;
     }
     .head{font-size:1.75rem}
+    
+    /* Mobile therapy session layout */
+    .therapy-session-container {
+        flex-direction: column;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        min-height: auto;
+    }
+    
+    .camera-feed-container {
+        min-height: 40vh;
+    }
+    
+    .camera-status {
+        top: 0.75rem;
+        right: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .status-text {
+        font-size: 0.75rem;
+    }
 }
 .Jump1{
     font-family: "gabarito";
@@ -408,3 +430,52 @@ footer {
     border-top: 1px solid rgba(255, 255, 255, 0.1); /* subtle divider */
     letter-spacing: 0.3px;
   }
+
+/* Additional therapy interface enhancements */
+.therapy-session-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    border-radius: 2rem;
+    padding: 2rem;
+    border: 1px solid rgba(186, 166, 221, 0.2);
+    box-shadow: 0 15px 40px rgba(186, 166, 221, 0.1);
+    transition: all 0.3s ease;
+}
+
+.therapy-session-container:hover {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px rgba(186, 166, 221, 0.2);
+}
+
+/* Enhanced error styling */
+.error-message {
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.1) 0%, rgba(255, 100, 100, 0.05) 100%);
+    border: 1px solid rgba(255, 0, 0, 0.2);
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: var(--dark_green);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.1);
+    animation: errorPulse 2s ease-in-out infinite;
+}
+
+@keyframes errorPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+/* Loading animation */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(186, 166, 221, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--purple);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
