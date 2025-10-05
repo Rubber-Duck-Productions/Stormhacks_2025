@@ -9,7 +9,8 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       host: '0.0.0.0',
       // 👇 Add this line
-      allowedHosts: ['stormhacks-2025-1.onrender.com'],
+      //allowedHosts: ['stormhacks-2025-1.onrender.com'],
+      allowedHosts: ['stormhacks-2025-uk0m.onrender.com'],
     },
     plugins: [react()],
     define: {
