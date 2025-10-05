@@ -31,7 +31,7 @@ const LandingPage: React.FC = () => {
       <div className="MainContent">
         <div className="text">
           <h1 className="font head">Therapy, Reinvented</h1>
-          <p className="font sub">Chatbot, voice, and eye-tracking tools in one secure, free space.</p>
+          <p className="font sub">Experience compassionate AI therapy with advanced voice recognition and facial expression analysis. Your mental health journey starts here.</p>
         </div>
 
         <video className="hero-video" autoPlay muted loop playsInline>
@@ -41,7 +41,7 @@ const LandingPage: React.FC = () => {
 
         <Link to="/chatbot">
           <button className="Jump1">
-            <p className="button1">Start Now</p>
+            <p className="button1">Start Your Journey</p>
           </button>
         </Link>
       </div>
@@ -50,15 +50,15 @@ const LandingPage: React.FC = () => {
       <div className="SecondContent">
         <div className="feature1">
           <img className="imgspec" src="./assets/natalia-sobolivska-Amgsioct30s-unsplash.jpg" alt="Voice therapy" />
-          <p>Talk instead of type, making therapy more natural and accessible.</p>
+          <p>Natural voice interaction makes therapy more accessible and comfortable for everyone.</p>
         </div>
         <div className="feature2">
           <img className="imgspec" src="./assets/anh-tuan-to-YK8BGJlfgq4-unsplash.jpg" alt="Focus detection" />
-          <p>Detect focus during mindfulness exercises (optional for users).</p>
+          <p>Advanced facial expression analysis provides deeper insights into your emotional state.</p>
         </div>
         <div className="feature3">
           <img className="imgspec" src="./assets/ennio-dybeli-KDdNjUQwzSw-unsplash.jpg" alt="Privacy protection" />
-          <p>Extra protection for those who want it, even without signing in.</p>
+          <p>Complete privacy protection with end-to-end encryption and anonymous access.</p>
         </div>
       </div>
 
@@ -66,8 +66,8 @@ const LandingPage: React.FC = () => {
       <div>
         <div className="ThirdContent">
           <div className="text3">
-            <h2>Anonymous & Secure — Your Mental Health, Protected</h2>
-            <p className="textBot3">We believe therapy should be accessible, private, and safe. Our app doesn't require a sign-in, collects no personal data, and provides tools to support you when you need them most.</p>
+            <h2>Your Privacy is Our Foundation</h2>
+            <p className="textBot3">We believe mental health support should be accessible, private, and safe. Our platform requires no sign-in, collects no personal data, and provides professional-grade tools to support you when you need them most.</p>
           </div>
           <img className="img3" src="./assets/nofacebetter.jpg" alt="Privacy illustration" />
         </div>

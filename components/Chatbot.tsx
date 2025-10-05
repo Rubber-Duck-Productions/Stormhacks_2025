@@ -99,7 +99,7 @@ const Chatbot: React.FC = () => {
       <div className="MainContent">
         <div className="text">
           <h1 className="font head">Your AI Therapy Session</h1>
-          <p className="font sub">We're here to listen and support you. Experience therapy with advanced voice recognition and facial expression analysis.</p>
+          <p className="font sub">Experience compassionate, personalized therapy with advanced voice recognition and facial expression analysis. We're here to listen and support you.</p>
           <div className="mt-6 flex justify-center space-x-4">
             <div className="flex items-center space-x-2 bg-slate-800/50 px-4 py-2 rounded-full">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-red-400">
@@ -152,7 +152,7 @@ const Chatbot: React.FC = () => {
         <div className="text3">
           <h2>Your Privacy is Our Priority</h2>
           <p className="textBot3">
-            All conversations are encrypted and private. Your mental health journey stays between you and our AI.
+            All conversations are encrypted and completely private. Your mental health journey stays between you and our AI, with no data collection or tracking.
           </p>
         </div>
       </div>
