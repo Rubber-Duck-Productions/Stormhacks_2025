@@ -140,7 +140,7 @@ button:hover{
 
 }
 h1.head{
-    font-size:75pt; 
+    font-size:60pt; 
     text-align:center;
     margin:0;
     color: var(--dark_green);
@@ -153,6 +153,13 @@ img{
     border-radius: 1rem;
     margin-bottom: 1rem;
     box-shadow: 0 8px 25px var(--shadow-medium);
+    transition: transform 0.3s ease;
+}
+.hero-video {
+    width: 65%;
+    border-radius: 1rem;
+    box-shadow: 0 8px 25px var(--shadow-medium);
+    object-fit: cover;
     transition: transform 0.3s ease;
 }
 
