@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Weather API Test</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:24px}
+    label,input,button{font-size:14px}
+    .row{margin-bottom:10px}
+    pre{background:#f6f8fa;border:1px solid #e1e4e8;padding:12px;overflow:auto}
+    .controls{display:flex;gap:8px;align-items:center}
+  </style>
+</head>
+<body>
+  <h2>Weather API quick tester</h2>
+
+  <div class="row">
+    <div class="controls">
+  <label for="city">City:</label>
+  <input id="city" placeholder="e.g. London" />
+  <button id="byCity">Get weather by city</button>
+  <button id="byIp">Get weather (by your IP)</button>
+  <button id="byBrowser">Use browser geolocation</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <strong>Location result</strong>
+    <pre id="loc">(no result)</pre>
+  </div>
+
+  <div class="row">
+    <strong>Weather result</strong>
+    <pre id="weather">(no result)</pre>
+  </div>
+
+  <script>
+    const locEl = document.getElementById('loc');
+    const weatherEl = document.getElementById('weather');
+    const cityInput = document.getElementById('city');
+
+    function show(el, obj){ el.textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2); }
+
+    async function callLocation(){
+      show(locEl, 'loading...');
+      try{
+        const r = await fetch('/api/location');
+        const j = await r.json();
+        show(locEl, j);
+        return j;
+      }catch(e){ show(locEl, { error: e.message }); }
+    }
+
+    async function callWeather(params){
+      show(weatherEl, 'loading...');
+      try{
+        const q = new URLSearchParams(params).toString();
+        const r = await fetch('/api/weather?' + q);
+        const j = await r.json();
+        show(weatherEl, j);
+        return j;
+      }catch(e){ show(weatherEl, { error: e.message }); }
+    }
+
+    document.getElementById('byCity').addEventListener('click', async ()=>{
+      const city = cityInput.value.trim();
+      if(!city){ alert('Enter a city name'); return }
+      await callWeather({ city });
+    });
+
+    document.getElementById('byIp').addEventListener('click', async ()=>{
+      // call /api/weather with no params so server uses request IP
+      await callWeather({});
+    });
+
+    document.getElementById('byBrowser').addEventListener('click', ()=>{
+      if(!navigator.geolocation){ alert('Geolocation not supported'); return }
+      show(locEl, 'requesting browser geolocation...');
+      navigator.geolocation.getCurrentPosition(async pos =>{
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        show(locEl, { lat, lon });
+        await callWeather({ lat, lon });
+      }, err =>{
+        show(locEl, { error: err.message });
+      });
+    });
+
+    // show basic health on load
+    (async ()=>{
+      try{
+        const h = await fetch('/api/health').then(r=>r.json());
+        console.log('health', h);
+      }catch(e){}
+    })();
+  </script>
+</body>
+</html>
