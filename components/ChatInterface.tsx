@@ -21,6 +21,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [voiceLanguage, setVoiceLanguage] = useState('en-US');
   const [summaries, setSummaries] = useState<string[]>([]);
+  const [isSummarizing, setIsSummarizing] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const voiceServiceRef = useRef<VoiceRecognitionService | null>(null);
@@ -61,58 +62,83 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
   }, [voiceLanguage]);
 
   // Cookie helpers (simple)
-  function setCookie(name: string, value: string, days = 30) {
-    const expires = new Date(Date.now() + days * 864e5).toUTCString();
-    document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
-  }
-  function getCookie(name: string) {
-    return document.cookie.split('; ').reduce((r, v) => {
-      const parts = v.split('=');
-      return parts[0] === name ? decodeURIComponent(parts[1]) : r;
-    }, '') as string;
+  // Local storage helpers with optional migration from cookie
+  function loadSummariesFromStorage(): string[] {
+    try {
+      const raw = localStorage.getItem('chat_summaries');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed as string[];
+      }
+    } catch (e) {
+      // fallthrough to cookie migration
+    }
+
+    // migration: check cookie (if older clients stored there)
+    try {
+      const cookie = document.cookie.split('; ').reduce((r, v) => {
+        const parts = v.split('=');
+        return parts[0] === 'chat_summaries' ? decodeURIComponent(parts[1]) : r;
+      }, '');
+      if (cookie) {
+        const parsed = JSON.parse(cookie);
+        if (Array.isArray(parsed)) {
+          // write to localStorage and remove cookie string (cannot reliably delete in all contexts)
+          try { localStorage.setItem('chat_summaries', JSON.stringify(parsed)); } catch (e) {}
+          return parsed as string[];
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+    return [];
   }
 
-  // Keep summaries in cookies as JSON array under 'chat_summaries'
-  useEffect(() => {
-    const raw = getCookie('chat_summaries');
-    if (raw) {
-      try {
-        const arr = JSON.parse(raw);
-        if (Array.isArray(arr)) setSummaries(arr);
-      } catch (e) {
-        // ignore
-      }
+  function saveSummariesToStorage(arr: string[]) {
+    try {
+      localStorage.setItem('chat_summaries', JSON.stringify(arr));
+    } catch (e) {
+      // ignore quota errors
     }
+  }
+
+  // Load summaries from localStorage (with migration from cookie)
+  useEffect(() => {
+    const arr = loadSummariesFromStorage();
+    if (arr && arr.length) setSummaries(arr);
   }, []);
 
-  // When messages change and last message is from assistant, request a summary
-  useEffect(() => {
+  // Manual summarization to avoid auto-calls
+  const handleSummarize = async () => {
+    if (isSummarizing) return;
     if (!messages || messages.length === 0) return;
-    const last = messages[messages.length - 1];
-    if (last.role !== 'model') return; // only summarize after assistant replies
-
-    // send messages to server to generate a short summary
-    (async () => {
-      try {
-        const resp = await fetch('/api/summarize', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages })
-        });
-        if (!resp.ok) return;
-        const data = await resp.json();
-        const summary = data.summary;
-        if (summary) {
-          // prepend newest
+    setIsSummarizing(true);
+    try {
+      const resp = await fetch('/api/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages })
+      });
+      if (!resp.ok) {
+        console.error('Summarize request failed', resp.status);
+        return;
+      }
+      const data = await resp.json();
+      const summary = data.summary?.trim();
+      if (summary) {
+        // avoid duplicate consecutive summaries
+        if (summaries.length === 0 || summaries[0] !== summary) {
           const newSummaries = [summary].concat(summaries).slice(0, 10);
           setSummaries(newSummaries);
-          try { setCookie('chat_summaries', JSON.stringify(newSummaries), 365); } catch (e) { /* ignore */ }
+          saveSummariesToStorage(newSummaries);
         }
-      } catch (e) {
-        console.error('Failed to fetch summary', e);
       }
-    })();
-  }, [messages]);
+    } catch (e) {
+      console.error('Failed to fetch summary', e);
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
 
   const toggleVoiceRecognition = useCallback(() => {
     if (!voiceServiceRef.current) return;
@@ -168,6 +194,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
                 aria-expanded={summaries.length > 0}
               >
                 Summaries <span className="ml-1 text-xs">▾</span>
+              </button>
+              <button
+                type="button"
+                className="ml-2 text-slate-200 bg-slate-700/40 hover:bg-slate-700/60 px-3 py-1 rounded-md text-sm"
+                onClick={handleSummarize}
+                disabled={isSummarizing}
+                title="Generate a short summary of the conversation"
+              >
+                {isSummarizing ? 'Summarizing…' : 'Summarize'}
               </button>
               <div id="summariesMenu" className="absolute right-0 mt-2 w-64 bg-slate-800/95 border border-slate-700 rounded-lg shadow-lg p-2 hidden z-40">
                 {summaries.length === 0 && <div className="text-slate-400 text-sm px-2 py-1">No summaries yet</div>}
