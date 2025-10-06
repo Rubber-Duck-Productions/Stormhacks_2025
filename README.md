@@ -87,9 +87,6 @@ PORT=3000
 - Use the Summaries dropdown to insert a saved summary back into the input box.
 - Toggle TTS (Voice On / Voice Off) to enable/disable spoken assistant replies. When enabled, assistant replies attempt to be played via the backend ElevenLabs TTS; fallback to browser TTS if the server is not configured.
 
-## Previewing a voice (suggested)
-
-A small preview button can be added to the UI to call `/api/tts` with quick sample text. If you want that, open an issue or I can add it for you.
 
 ## Troubleshooting
 
@@ -104,16 +101,7 @@ npx tsc --noEmit
 
 - If summaries return 503, ensure `GEMINI_API_KEY`/`API_KEY` is set and valid.
 
-## Contributing / next steps
 
-- Add a small voice preview button beside the voice selector (I can implement this on request).
-- Improve voice labeling (show country/gender metadata cleanly in the select menu).
-- Add server-side caching for voice list and summaries.
 
-## License
 
-This project contains a LICENSE file in the repository root. Follow that license for reuse.
 
----
-
-If you want, I can now add a one-click "Preview voice" button in the chat header that plays a short sample using the selected ElevenLabs voice — should I add that next?
