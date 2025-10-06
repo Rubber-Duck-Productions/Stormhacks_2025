@@ -1,6 +1,6 @@
 # Stormhacks_2025
 
-Lightweight React + Node prototype: an empathetic AI chat UI (Tessa) with summarization and TTS support.
+Lightweight React + Node prototype: an empathetic AI chat UI (Lux box) with summarization and TTS support.
 
 This repo contains a Vite + React frontend and a small Express backend proxy that provides a few helper APIs (location, weather, ElevenLabs voice proxy, ElevenLabs TTS, and a Gemini summarization endpoint).
 
@@ -16,13 +16,12 @@ This repo contains a Vite + React frontend and a small Express backend proxy tha
 
 Prerequisites
 
-- Node.js (18+ recommended)
+- Node.js (version 18+ recommended)
 - npm (or pnpm/yarn if you prefer)
 - (Optional) ElevenLabs API key for server-side TTS
 - (Optional) Gemini API key for summarization
 
-1. Clone repo (already present in your workspace)
-
+1. Clone repo 
 2. Install frontend deps and run Vite dev server
 
 ```powershell
@@ -30,7 +29,6 @@ Prerequisites
 npm install
 npm run dev
 ```
-
 3. Start backend server
 
 ```powershell
@@ -39,7 +37,6 @@ npm install
 # create a .env with the variables described below, then:
 node server.js
 ```
-
 By default the frontend will run on the Vite port (usually http://localhost:5173) and the backend listens on port 3000 unless you set `PORT`.
 
 ## Environment variables
